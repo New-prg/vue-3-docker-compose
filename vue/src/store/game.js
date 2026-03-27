@@ -1,11 +1,5 @@
 import mazeConfigurations from './game/maze-configurations'
 
-const GAME_STATUSES = {
-  IDLE: "IDLE",
-  READY: "READY",
-  WON: "WON",
-};
-
 const CELL_TYPES = {
   WALL: "wall",
   PATH: "path",
@@ -105,13 +99,11 @@ const createGameStateSnapshot = (maze, playerPosition) => {
   const normalizedPlayerPosition = createPlayerPosition(playerPosition);
   const progress = createProgress(maze);
   const isComplete = progress.current === progress.total;
-  const partyStatus = isComplete ? GAME_STATUSES.WON : GAME_STATUSES.READY;
 
   return {
     maze,
     player: normalizedPlayerPosition,
     progress,
-    partyStatus,
     isComplete,
     availableMoves: isComplete
       ? createDisabledMoves()
@@ -215,9 +207,7 @@ export default {
 
     return {
       cellTypes: CELL_TYPES,
-      statuses: GAME_STATUSES,
       directions: MOVE_DIRECTIONS,
-      availableLevels: mazeConfigurations,
       configurations: mazeConfigurations,
       currentLevel: createCurrentLevel(initialConfiguration),
       ...preparedState,
@@ -231,7 +221,6 @@ export default {
       state.maze = gameState.maze;
       state.player = gameState.player;
       state.progress = gameState.progress;
-      state.partyStatus = gameState.partyStatus;
       state.isComplete = gameState.isComplete;
       state.availableMoves = gameState.availableMoves;
     },

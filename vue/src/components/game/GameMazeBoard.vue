@@ -9,6 +9,10 @@
             >
                 Reset
             </button>
+
+            <RouterLink class="game-page__index-link" :to="{ name: ROUTES.INDEX }">
+                Index
+            </RouterLink>
         </div>
 
         <div class="game-page__maze" :aria-label="mazeAriaLabel">
@@ -51,7 +55,9 @@ import {
     ref,
     watch,
 } from "vue";
+import { RouterLink } from "vue-router";
 
+import { ROUTES } from "@/router/index.js";
 import type {
     CellTypes,
     MazeBoardCell,
@@ -226,7 +232,8 @@ onBeforeUnmount(() => {
     max-width: calc(100% - (var(--game-space-1) * 2));
 }
 
-.game-page__reset {
+.game-page__reset,
+.game-page__index-link {
     border: 1px solid var(--color-border-hover);
     background: color-mix(in srgb, var(--color-background) 78%, transparent);
     color: var(--color-heading);
@@ -234,6 +241,10 @@ onBeforeUnmount(() => {
     opacity: 1;
     padding: var(--game-space-1) var(--game-space-2);
     line-height: 1.2;
+}
+
+.game-page__index-link {
+    text-decoration: none;
 }
 
 .game-page__maze {
