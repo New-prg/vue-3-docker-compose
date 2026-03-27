@@ -2,9 +2,16 @@
   <main class="game-page" aria-label="Game surface">
     <section class="game-page__surface">
       <div class="game-page__maze-shell" :style="mazeStyle">
-        <button type="button" class="game-page__reset" disabled>
-          Reset
-        </button>
+        <div class="game-page__actions">
+          <button
+            type="button"
+            class="game-page__reset"
+            :disabled="isResetDisabled"
+            @click="resetCurrentMaze"
+          >
+            Reset
+          </button>
+        </div>
 
         <div class="game-page__maze" :aria-label="mazeAriaLabel">
           <div
@@ -12,30 +19,75 @@
             :key="`${cell.row}-${cell.column}`"
             class="game-page__cell"
             :class="{
-              'game-page__cell--wall': cell.type === 'wall',
+              'game-page__cell--visited': cell.isVisited,
+              'game-page__cell--wall': cell.type === cellTypes.WALL,
               'game-page__cell--player': cell.isPlayer,
             }"
           >
-            <span v-if="cell.isPlayer" class="game-page__player" aria-hidden="true"></span>
+            <span v-if="cell.isPlayer" class="game-page__player" aria-hidden="true">
+              {{ playerProgressLabel }}
+            </span>
           </div>
         </div>
       </div>
 
       <div class="game-page__controls" aria-label="Directional controls placeholder">
-        <button type="button" class="game-page__control game-page__control--left" disabled>
+        <button
+          type="button"
+          class="game-page__control game-page__control--left"
+          :disabled="isDirectionDisabled(directions.LEFT)"
+          @click="movePlayer(directions.LEFT)"
+        >
           ←
         </button>
-        <button type="button" class="game-page__control game-page__control--up" disabled>
+        <button
+          type="button"
+          class="game-page__control game-page__control--up"
+          :disabled="isDirectionDisabled(directions.UP)"
+          @click="movePlayer(directions.UP)"
+        >
           ↑
         </button>
-        <button type="button" class="game-page__control game-page__control--down" disabled>
+        <button
+          type="button"
+          class="game-page__control game-page__control--down"
+          :disabled="isDirectionDisabled(directions.DOWN)"
+          @click="movePlayer(directions.DOWN)"
+        >
           ↓
         </button>
-        <button type="button" class="game-page__control game-page__control--right" disabled>
+        <button
+          type="button"
+          class="game-page__control game-page__control--right"
+          :disabled="isDirectionDisabled(directions.RIGHT)"
+          @click="movePlayer(directions.RIGHT)"
+        >
           →
         </button>
       </div>
     </section>
+
+    <div
+      v-if="isComplete"
+      class="game-page__overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="game-page-winner-title"
+    >
+      <div class="game-page__overlay-panel">
+        <p id="game-page-winner-title" class="game-page__overlay-title">
+          winner winner chicken dinner
+        </p>
+
+        <button
+          type="button"
+          class="game-page__overlay-action"
+          @click="handleWinnerAction"
+        >
+          Ура
+        </button>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -53,9 +105,37 @@ interface Player {
   column: number
 }
 
+interface MazeConfiguration {
+  id: string
+  name: string
+}
+
+interface GameDirections {
+  UP: string
+  DOWN: string
+  LEFT: string
+  RIGHT: string
+}
+
+interface AvailableMoves {
+  [key: string]: boolean
+}
+
+interface Progress {
+  current: number
+  total: number
+}
+
 interface GameModuleState {
   maze: MazeCell[][]
   player: Player
+  configurations: MazeConfiguration[]
+  currentLevel: MazeConfiguration
+  cellTypes?: Record<string, string>
+  directions?: Partial<GameDirections>
+  availableMoves?: AvailableMoves
+  progress?: Progress
+  isComplete?: boolean
 }
 
 interface RootState {
@@ -63,11 +143,87 @@ interface RootState {
 }
 
 const store = useStore<RootState>()
+const defaultDirections: GameDirections = {
+  UP: 'up',
+  DOWN: 'down',
+  LEFT: 'left',
+  RIGHT: 'right',
+}
+const defaultCellTypes = {
+  WALL: 'wall',
+}
 
 const gameState = computed(() => store.state.game)
+const configurations = computed(() => gameState.value.configurations ?? [])
+const cellTypes = computed(() => ({
+  ...defaultCellTypes,
+  ...(gameState.value.cellTypes ?? {}),
+}))
+const directions = computed<GameDirections>(() => ({
+  ...defaultDirections,
+  ...(gameState.value.directions ?? {}),
+}))
 
 const mazeRows = computed(() => gameState.value.maze.length)
 const mazeColumns = computed(() => gameState.value.maze[0]?.length ?? 0)
+
+const currentConfigurationIndex = computed(() => {
+  return configurations.value.findIndex(
+    (configuration) => configuration.id === gameState.value.currentLevel?.id,
+  )
+})
+
+const isComplete = computed(() => Boolean(gameState.value.isComplete))
+
+const isMazeSwitchDisabled = computed(() => configurations.value.length <= 1)
+const isResetDisabled = computed(() => !gameState.value.currentLevel?.id)
+
+const movePlayer = (direction: string) => {
+  store.dispatch('game/movePlayer', direction)
+}
+
+const isDirectionDisabled = (direction?: string) => {
+  if (!direction || isComplete.value) {
+    return true
+  }
+
+  return !gameState.value.availableMoves?.[direction]
+}
+
+const resetCurrentMaze = () => {
+  const currentLevelId = gameState.value.currentLevel?.id
+
+  if (!currentLevelId) {
+    return
+  }
+
+  store.dispatch('game/initializeGame', currentLevelId)
+}
+
+const cycleMazeConfiguration = () => {
+  if (isMazeSwitchDisabled.value) {
+    return
+  }
+
+  const nextIndex = (currentConfigurationIndex.value + 1) % configurations.value.length
+  const nextConfiguration = configurations.value[nextIndex] ?? configurations.value[0]
+
+  if (!nextConfiguration) {
+    return
+  }
+
+  store.dispatch('game/initializeGame', nextConfiguration.id)
+}
+
+const handleWinnerAction = () => {
+  if (isMazeSwitchDisabled.value) {
+    resetCurrentMaze()
+
+    return
+  }
+
+  cycleMazeConfiguration()
+}
 
 const mazeCells = computed(() => {
   return gameState.value.maze.flatMap((row, rowIndex) => {
@@ -75,11 +231,22 @@ const mazeCells = computed(() => {
       row: rowIndex,
       column: columnIndex,
       type: cell.type,
+      isVisited: cell.visited && cell.type !== cellTypes.value.WALL,
       isPlayer:
         gameState.value.player.row === rowIndex
         && gameState.value.player.column === columnIndex,
     }))
   })
+})
+
+const playerProgressLabel = computed(() => {
+  const progress = gameState.value.progress
+
+  if (!progress?.total) {
+    return ''
+  }
+
+  return `${progress.current}/${progress.total}`
 })
 
 const mazeStyle = computed(() => ({
@@ -97,6 +264,7 @@ const mazeAriaLabel = computed(() => {
   --game-space-1: 0.5rem;
   --game-space-2: 0.75rem;
   --game-space-3: 1rem;
+  --game-space-4: 1.5rem;
   --game-page-inline-padding: 2rem;
   --game-viewport-padding: 4rem;
   --game-control-strip-height: clamp(3.5rem, 12dvh, 4.75rem);
@@ -136,7 +304,19 @@ const mazeAriaLabel = computed(() => {
   margin: 0 auto;
 }
 
+.game-page__actions {
+  position: absolute;
+  top: var(--game-space-1);
+  right: var(--game-space-1);
+  z-index: 1;
+  display: grid;
+  justify-items: end;
+  gap: var(--game-space-1);
+  max-width: calc(100% - (var(--game-space-1) * 2));
+}
+
 .game-page__reset,
+.game-page__overlay-action,
 .game-page__control {
   border: 1px solid var(--color-border-hover);
   background: var(--color-background-soft);
@@ -145,13 +325,11 @@ const mazeAriaLabel = computed(() => {
   opacity: 1;
 }
 
-.game-page__reset {
-  position: absolute;
-  top: var(--game-space-1);
-  right: var(--game-space-1);
-  z-index: 1;
+.game-page__reset,
+.game-page__overlay-action {
   padding: var(--game-space-1) var(--game-space-2);
   background: color-mix(in srgb, var(--color-background) 78%, transparent);
+  line-height: 1.2;
 }
 
 .game-page__maze {
@@ -171,15 +349,58 @@ const mazeAriaLabel = computed(() => {
   place-items: center;
 }
 
+.game-page__cell--visited {
+  background: color-mix(in srgb, var(--color-heading) 12%, var(--color-background));
+}
+
 .game-page__cell--wall {
   background: var(--color-background-mute);
 }
 
 .game-page__player {
-  width: 55%;
-  height: 55%;
+  width: 78%;
+  height: 78%;
   border: 1px solid var(--color-heading);
   background: var(--color-heading);
+  color: var(--color-background);
+  display: grid;
+  place-items: center;
+  padding: var(--game-space-1);
+  font-size: clamp(0.5rem, 1.3vw, 0.875rem);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
+.game-page__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: var(--game-space-4);
+  background: color-mix(in srgb, var(--color-background) 70%, transparent);
+}
+
+.game-page__overlay-panel {
+  display: grid;
+  justify-items: center;
+  gap: var(--game-space-3);
+  padding: var(--game-space-4);
+  border: 1px solid var(--color-border-hover);
+  background: color-mix(in srgb, var(--color-background-soft) 92%, transparent);
+  min-width: min(100%, 22rem);
+}
+
+.game-page__overlay-title {
+  color: var(--color-heading);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.game-page__overlay-action {
+  min-width: 6rem;
 }
 
 .game-page__controls {
