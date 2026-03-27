@@ -1,40 +1,23 @@
 <template>
-  <section class="indexPage">
-    <p class="indexPage__title">
-      Index
-    </p>
+  Index
 
-    <div class="indexPage__links">
-      <RouterLink class="indexPage__link" :to="{ name: $routes.EXAMPLE }">
-        To Example
-      </RouterLink>
+  <div>
+    <RouterLink :to="{ name: $routes.EXAMPLE }">
+     To Example
+    </RouterLink>
+  </div>
 
-      <RouterLink class="indexPage__link" :to="{ name: $routes.GAME }">
-        To Game
-      </RouterLink>
-    </div>
-  </section>
+  <div>
+    <RouterLink :to="{ name: $routes.GAME }">
+      To Game
+    </RouterLink>
+  </div>
 </template>
 
 <script setup lang="ts">
+
 </script>
 
 <style scoped>
-.indexPage {
-  display: grid;
-  gap: 1rem;
-}
 
-.indexPage__title {
-  margin: 0;
-}
-
-.indexPage__links {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.indexPage__link {
-  width: fit-content;
-}
 </style>
