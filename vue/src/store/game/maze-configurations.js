@@ -1,7 +1,4 @@
-const CELL_TYPES = {
-  WALL: 'wall',
-  PATH: 'path',
-}
+import { CELL_TYPES } from './constants'
 
 const createMazeConfiguration = ({
   id,
@@ -18,11 +15,11 @@ const createMazeConfiguration = ({
 })
 
 const createMazeRowsFromLayout = (layout) => {
-  return layout.map((row) =>
-    row
+  return layout.map((row) => {
+    return row
       .split('')
-      .map((cell) => (cell === '#' ? CELL_TYPES.WALL : CELL_TYPES.PATH)),
-  )
+      .map((cell) => (cell === '#' ? CELL_TYPES.WALL : CELL_TYPES.PATH))
+  })
 }
 
 const mazeConfigurations = [
