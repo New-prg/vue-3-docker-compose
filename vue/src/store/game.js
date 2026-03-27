@@ -1,3 +1,5 @@
+import mazeConfigurations from './game/maze-configurations'
+
 const GAME_STATUSES = {
   IDLE: "IDLE",
   READY: "READY",
@@ -108,9 +110,7 @@ const createGameStateSnapshot = (maze, playerPosition) => {
   return {
     maze,
     player: normalizedPlayerPosition,
-    playerPosition: normalizedPlayerPosition,
     progress,
-    partyState: partyStatus,
     partyStatus,
     isComplete,
     availableMoves: isComplete
@@ -179,155 +179,6 @@ const createDisabledMoves = () => {
   }, {});
 };
 
-const createMazeConfiguration = ({
-  id,
-  name,
-  description,
-  rows,
-  playerPosition,
-}) => ({
-  id,
-  name,
-  description,
-  rows,
-  playerPosition,
-});
-
-const createMazeRowsFromLayout = (layout) => {
-  return layout.map((row) =>
-    row
-      .split("")
-      .map((cell) => (cell === "#" ? CELL_TYPES.WALL : CELL_TYPES.PATH)),
-  );
-};
-
-const mazeConfigurations = [
-  createMazeConfiguration({
-    id: "training-ground",
-    name: "Training ground",
-    description: "Main testing Layout",
-    rows: [
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-      ],
-    ],
-    playerPosition: {
-      row: 1,
-      column: 1,
-    },
-  }),
-  createMazeConfiguration({
-    id: "wide-corridor",
-    name: "Wide corridor",
-    description: "Alternative layout for testing",
-    rows: [
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.PATH,
-        CELL_TYPES.WALL,
-      ],
-      [
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-        CELL_TYPES.WALL,
-      ],
-    ],
-    playerPosition: {
-      row: 1,
-      column: 1,
-    },
-  }),
-  createMazeConfiguration({
-    id: "labyrinth-16",
-    name: "Labyrinth 16x16",
-    description: "Large maze layout with branches and dead ends",
-    rows: createMazeRowsFromLayout([
-      "################",
-      "#..............#",
-      "##############.#",
-      "#.......######.#",
-      "#.#####.######.#",
-      "#.#####.######.#",
-      "#.#####.######.#",
-      "#.#####.######.#",
-      "#.#####.######.#",
-      "#.#####.######.#",
-      "#.#####.######.#",
-      "#............#.#",
-      "######.#######.#",
-      "#......#.......#",
-      "#...........#..#",
-      "################",
-    ]),
-    playerPosition: {
-      row: 1,
-      column: 1,
-    },
-  }),
-];
-
 const createStateFromConfiguration = (configuration) => {
   const maze = buildMaze(configuration.rows);
   const playerPosition = createPlayerPosition(configuration.playerPosition);
@@ -343,7 +194,7 @@ const createMovedState = (state, direction) => {
   }
 
   const maze = cloneMaze(state.maze);
-  const playerPosition = createPlayerPosition(state.playerPosition);
+  const playerPosition = createPlayerPosition(state.player);
   const moveResult = resolveMove(maze, playerPosition, direction);
 
   if (moveResult.blocked) {
@@ -372,18 +223,6 @@ export default {
       ...preparedState,
     };
   },
-  getters: {
-    getMaze: (state) => state.maze,
-    getPlayer: (state) => state.player,
-    getPlayerPosition: (state) => state.playerPosition,
-    getProgress: (state) => state.progress,
-    getCurrentLevel: (state) => state.currentLevel,
-    getPartyStatus: (state) => state.partyStatus,
-    getConfigurations: (state) => state.configurations,
-    getIsComplete: (state) => state.isComplete,
-    getAvailableMoves: (state) => state.availableMoves,
-    getDirections: (state) => state.directions,
-  },
   mutations: {
     SET_CURRENT_LEVEL: (state, configuration) => {
       state.currentLevel = createCurrentLevel(configuration);
@@ -391,9 +230,7 @@ export default {
     SET_GAME_STATE: (state, gameState) => {
       state.maze = gameState.maze;
       state.player = gameState.player;
-      state.playerPosition = gameState.playerPosition;
       state.progress = gameState.progress;
-      state.partyState = gameState.partyState;
       state.partyStatus = gameState.partyStatus;
       state.isComplete = gameState.isComplete;
       state.availableMoves = gameState.availableMoves;
