@@ -1,4 +1,4 @@
-import mazeConfigurations from './game/maze-configurations'
+import mazeConfigurations from './game/mazeConfigurations'
 import { CELL_TYPES, GAME_MUTATIONS, MOVE_DIRECTIONS } from './game/constants'
 
 const DIRECTION_VECTORS = {
