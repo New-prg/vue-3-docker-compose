@@ -50,7 +50,7 @@
 
             <div
                 class="game-page__controls"
-                aria-label="Directional controls placeholder"
+                aria-label="Maze directional controls"
             >
                 <button
                     type="button"
@@ -104,7 +104,7 @@
                     class="game-page__overlay-action"
                     @click="handleWinnerAction"
                 >
-                    Hooray
+                    Hooray!
                 </button>
             </div>
         </div>
@@ -137,6 +137,11 @@ interface MazeConfiguration {
     name: string;
 }
 
+interface CellTypes {
+    WALL: string;
+    PATH: string;
+}
+
 interface GameDirections {
     UP: string;
     DOWN: string;
@@ -158,8 +163,8 @@ interface GameModuleState {
     player: Player;
     configurations: MazeConfiguration[];
     currentLevel: MazeConfiguration;
-    cellTypes?: Record<string, string>;
-    directions?: Partial<GameDirections>;
+    cellTypes: CellTypes;
+    directions: GameDirections;
     availableMoves?: AvailableMoves;
     progress?: Progress;
     isComplete?: boolean;
@@ -170,15 +175,6 @@ interface RootState {
 }
 
 const store = useStore<RootState>();
-const defaultDirections: GameDirections = {
-    UP: "up",
-    DOWN: "down",
-    LEFT: "left",
-    RIGHT: "right",
-};
-const defaultCellTypes = {
-    WALL: "wall",
-};
 const mazeShellElement = ref<HTMLElement | null>(null);
 const playerLabelMeasureElement = ref<HTMLElement | null>(null);
 const shouldUseCompactPlayerLabel = ref(false);
@@ -187,14 +183,8 @@ let playerLabelResizeObserver: ResizeObserver | null = null;
 
 const gameState = computed(() => store.state.game);
 const configurations = computed(() => gameState.value.configurations ?? []);
-const cellTypes = computed(() => ({
-    ...defaultCellTypes,
-    ...(gameState.value.cellTypes ?? {}),
-}));
-const directions = computed<GameDirections>(() => ({
-    ...defaultDirections,
-    ...(gameState.value.directions ?? {}),
-}));
+const cellTypes = computed(() => gameState.value.cellTypes);
+const directions = computed(() => gameState.value.directions);
 
 const mazeRows = computed(() => gameState.value.maze.length);
 const mazeColumns = computed(() => gameState.value.maze[0]?.length ?? 0);
@@ -310,7 +300,7 @@ const mazeStyle = computed(() => ({
 }));
 
 const mazeAriaLabel = computed(() => {
-    return `Maze placeholder ${mazeRows.value} by ${mazeColumns.value}, player at row ${gameState.value.player.row}, column ${gameState.value.player.column}`;
+    return `Maze ${mazeRows.value} by ${mazeColumns.value}, player at row ${gameState.value.player.row}, column ${gameState.value.player.column}`;
 });
 
 const updatePlayerLabelMode = () => {

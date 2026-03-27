@@ -94,6 +94,31 @@ const createPlayerPosition = (playerPosition) => ({
   column: playerPosition.column,
 });
 
+const createCurrentLevel = (configuration) => ({
+  id: configuration.id,
+  name: configuration.name,
+});
+
+const createGameStateSnapshot = (maze, playerPosition) => {
+  const normalizedPlayerPosition = createPlayerPosition(playerPosition);
+  const progress = createProgress(maze);
+  const isComplete = progress.current === progress.total;
+  const partyStatus = isComplete ? GAME_STATUSES.WON : GAME_STATUSES.READY;
+
+  return {
+    maze,
+    player: normalizedPlayerPosition,
+    playerPosition: normalizedPlayerPosition,
+    progress,
+    partyState: partyStatus,
+    partyStatus,
+    isComplete,
+    availableMoves: isComplete
+      ? createDisabledMoves()
+      : getAvailableMoves(maze, normalizedPlayerPosition),
+  };
+};
+
 const resolveMove = (maze, playerPosition, direction) => {
   const vector = DIRECTION_VECTORS[direction];
 
@@ -141,6 +166,14 @@ const getAvailableMoves = (maze, playerPosition) => {
   return Object.values(MOVE_DIRECTIONS).reduce((availability, direction) => {
     availability[direction] = !resolveMove(maze, playerPosition, direction)
       .blocked;
+
+    return availability;
+  }, {});
+};
+
+const createDisabledMoves = () => {
+  return Object.values(MOVE_DIRECTIONS).reduce((availability, direction) => {
+    availability[direction] = false;
 
     return availability;
   }, {});
@@ -301,20 +334,7 @@ const createStateFromConfiguration = (configuration) => {
 
   markVisitedCells(maze, [playerPosition]);
 
-  const progress = createProgress(maze);
-  const isComplete = progress.current === progress.total;
-  const partyStatus = isComplete ? GAME_STATUSES.WON : GAME_STATUSES.READY;
-
-  return {
-    maze,
-    player: createPlayerPosition(playerPosition),
-    playerPosition,
-    progress,
-    partyState: partyStatus,
-    partyStatus,
-    isComplete,
-    availableMoves: getAvailableMoves(maze, playerPosition),
-  };
+  return createGameStateSnapshot(maze, playerPosition);
 };
 
 const createMovedState = (state, direction) => {
@@ -332,21 +352,7 @@ const createMovedState = (state, direction) => {
 
   markVisitedCells(maze, moveResult.traversedCells);
 
-  const nextPlayerPosition = createPlayerPosition(moveResult.finalPosition);
-  const progress = createProgress(maze);
-  const isComplete = progress.current === progress.total;
-  const partyStatus = isComplete ? GAME_STATUSES.WON : GAME_STATUSES.READY;
-
-  return {
-    maze,
-    player: createPlayerPosition(nextPlayerPosition),
-    playerPosition: nextPlayerPosition,
-    progress,
-    partyState: partyStatus,
-    partyStatus,
-    isComplete,
-    availableMoves: getAvailableMoves(maze, nextPlayerPosition),
-  };
+  return createGameStateSnapshot(maze, moveResult.finalPosition);
 };
 
 const initialConfiguration = mazeConfigurations[0];
@@ -362,10 +368,7 @@ export default {
       directions: MOVE_DIRECTIONS,
       availableLevels: mazeConfigurations,
       configurations: mazeConfigurations,
-      currentLevel: {
-        id: initialConfiguration.id,
-        name: initialConfiguration.name,
-      },
+      currentLevel: createCurrentLevel(initialConfiguration),
       ...preparedState,
     };
   },
@@ -383,10 +386,7 @@ export default {
   },
   mutations: {
     SET_CURRENT_LEVEL: (state, configuration) => {
-      state.currentLevel = {
-        id: configuration.id,
-        name: configuration.name,
-      };
+      state.currentLevel = createCurrentLevel(configuration);
     },
     SET_GAME_STATE: (state, gameState) => {
       state.maze = gameState.maze;
