@@ -61,56 +61,61 @@ const isDirectionDisabled = (direction?: string) => {
 }
 </script>
 
-<style scoped>
-.gamePage__controls {
-  flex: 0 0 auto;
-  align-self: center;
-  width: min(100%, var(--gameControlsBaseWidth));
-  height: var(--gameControlStripHeight);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: var(--gameSpace1);
-}
+<style scoped lang="scss">
 
-.gamePage__control {
-  min-height: 0;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--color-border-hover);
-  background: var(--color-background-soft);
-  color: var(--color-heading);
-  font: inherit;
-  font-size: 1.125rem;
-  line-height: 1;
-  opacity: 1;
-}
+.gamePage {
+  &__controls {
+    flex: 0 0 auto;
+    align-self: center;
+    width: min(100%, var(--gameControlsBaseWidth));
+    height: var(--gameControlStripHeight);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: var(--gameSpace1);
+  }
 
-.gamePage__controlLeft {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-}
+  &__control {
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid var(--color-border-hover);
+    background: var(--color-background-soft);
+    color: var(--color-heading);
+    font: inherit;
+    font-size: 1.125rem;
+    line-height: 1;
+    opacity: 1;
 
-.gamePage__controlUp {
-  grid-column: 2;
-  grid-row: 1;
-}
+    &Left {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
 
-.gamePage__controlDown {
-  grid-column: 2;
-  grid-row: 2;
-}
+    &Up {
+      grid-column: 2;
+      grid-row: 1;
+    }
 
-.gamePage__controlRight {
-  grid-column: 3;
-  grid-row: 1 / span 2;
+    &Down {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    &Right {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+    }
+  }
 }
 
 @media (max-width: 45rem) {
-  .gamePage__controls {
-    width: 100%;
+  .gamePage {
+    &__controls {
+      width: 100%;
+    }
   }
 }
 </style>

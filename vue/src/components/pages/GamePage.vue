@@ -99,7 +99,7 @@ const onWinnerAction = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .gamePage {
   --gameSpace1: 0.5rem;
   --gameSpace2: 0.75rem;

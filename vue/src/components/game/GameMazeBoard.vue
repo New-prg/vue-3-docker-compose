@@ -26,7 +26,6 @@
         :class="{
           gamePage__cellVisited: cell.isVisited,
           gamePage__cellWall: cell.type === props.cellTypes.WALL,
-          gamePage__cellPlayer: cell.isPlayer,
         }"
       >
         <span
@@ -199,101 +198,102 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.gamePage__mazeShell {
-  --game-maze-max-height: calc(
-    var(--gameSurfaceHeight) - var(--gameControlStripHeight) -
-      var(--gameSpace3)
-  );
+<style scoped lang="scss">
+.gamePage {
+  &__mazeShell {
+    --game-maze-max-height: calc(
+      var(--gameSurfaceHeight) - var(--gameControlStripHeight) -
+        var(--gameSpace3)
+    );
 
-  position: relative;
-  flex: 0 0 auto;
-  width: min(
-    100%,
-    calc(var(--game-maze-max-height) * (var(--maze-columns) / var(--maze-rows)))
-  );
-  max-width: 100%;
-  min-width: 0;
-  margin: 0 auto;
-}
+    position: relative;
+    flex: 0 0 auto;
+    width: min(
+      100%,
+      calc(var(--game-maze-max-height) * (var(--maze-columns) / var(--maze-rows)))
+    );
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+  }
 
-.gamePage__actions {
-  position: absolute;
-  top: var(--gameSpace1);
-  right: var(--gameSpace1);
-  z-index: 1;
-  display: grid;
-  justify-items: end;
-  gap: var(--gameSpace1);
-  max-width: calc(100% - (var(--gameSpace1) * 2));
-}
+  &__actions {
+    position: absolute;
+    top: var(--gameSpace1);
+    right: var(--gameSpace1);
+    z-index: 1;
+    display: grid;
+    justify-items: end;
+    gap: var(--gameSpace1);
+    max-width: calc(100% - (var(--gameSpace1) * 2));
+  }
 
-.gamePage__actionButton {
-  border: 1px solid var(--color-border-hover);
-  background: color-mix(in srgb, var(--color-background) 78%, transparent);
-  color: var(--color-heading);
-  font: inherit;
-  opacity: 1;
-  padding: var(--gameSpace1) var(--gameSpace2);
-  line-height: 1.2;
-}
+  &__actionButton {
+    border: 1px solid var(--color-border-hover);
+    background: color-mix(in srgb, var(--color-background) 78%, transparent);
+    color: var(--color-heading);
+    font: inherit;
+    opacity: 1;
+    padding: var(--gameSpace1) var(--gameSpace2);
+    line-height: 1.2;
+  }
 
-.gamePage__indexLink {
-  text-decoration: none;
-}
+  &__indexLink {
+    text-decoration: none;
+  }
 
-.gamePage__maze {
-  display: grid;
-  grid-template-columns: repeat(var(--maze-columns), minmax(0, 1fr));
-  width: 100%;
-  aspect-ratio: var(--maze-columns) / var(--maze-rows);
-  border: 1px solid var(--color-border-hover);
-  background: var(--color-background);
-}
+  &__maze {
+    display: grid;
+    grid-template-columns: repeat(var(--maze-columns), minmax(0, 1fr));
+    width: 100%;
+    aspect-ratio: var(--maze-columns) / var(--maze-rows);
+    border: 1px solid var(--color-border-hover);
+    background: var(--color-background);
+  }
 
-.gamePage__cell {
-  aspect-ratio: 1;
-  border: 1px solid var(--color-border);
-  background: var(--color-background);
-  display: grid;
-  place-items: center;
-}
+  &__cell {
+    aspect-ratio: 1;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    display: grid;
+    place-items: center;
 
-.gamePage__cellVisited {
-  background: color-mix(
-    in srgb,
-    var(--color-heading) 12%,
-    var(--color-background)
-  );
-}
+    &Visited {
+      background: color-mix(
+        in srgb,
+        var(--color-heading) 12%,
+        var(--color-background)
+      );
+    }
 
-.gamePage__cellWall {
-  background: var(--color-background-mute);
-}
+    &Wall {
+      background: var(--color-background-mute);
+    }
+  }
+  &__player {
+    width: 78%;
+    height: 78%;
+    border: 1px solid var(--color-heading);
+    background: var(--color-heading);
+    color: var(--color-background);
+    display: grid;
+    place-items: center;
+    padding: var(--gameSpace1);
+    font-size: clamp(0.5rem, 1.3vw, 0.875rem);
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
 
-.gamePage__player {
-  width: 78%;
-  height: 78%;
-  border: 1px solid var(--color-heading);
-  background: var(--color-heading);
-  color: var(--color-background);
-  display: grid;
-  place-items: center;
-  padding: var(--gameSpace1);
-  font-size: clamp(0.5rem, 1.3vw, 0.875rem);
-  font-weight: 600;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.gamePage__playerMeasure {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: auto;
-  height: auto;
-  visibility: hidden;
-  pointer-events: none;
+    &Measure {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
 }
 </style>
